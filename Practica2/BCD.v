@@ -1,6 +1,6 @@
 module BCD(
     input [3:0] bcd_in,
-    output reg [6:0] bcd_out //Cuando se usa la sentencia always se debe usar "reg" en el output 
+    output reg [0:6] bcd_out //Cuando se usa la sentencia always se debe usar "reg" en el output 
 );
 
 always @(*)
