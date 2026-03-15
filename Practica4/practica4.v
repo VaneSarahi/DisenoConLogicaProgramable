@@ -10,16 +10,19 @@ module practica4(
 
 //clock divider 
 reg [25:0] counter;
-reg clk_div;
+wire clk_div;
 
 //clk divider
-always @(posedge clk)
+always @(posedge clk or posedge reset)
     begin 
-        counter <= counter + 1;
-        clk_div <= counter [25];
+			if (reset)
+			counter <=0;
+			else 
+			  counter <= counter + 1;
     end 
-
 	 
+assign clk_div = counter [25];
+
 //parametros 
 
 parameter [15:0] password= 16'h1234;
@@ -34,10 +37,10 @@ reg [3:0] d0, d1, d2, d3; //para no tener que definir los caso uno a uno
 wire [0:6] D0, D1, D2, D3;
 
  // Instancias BCD
-BCD disp0 (.bcd_in(d0), .bcd_out(D0));
-BCD disp1 (.bcd_in(d1), .bcd_out(D1));
-BCD disp2 (.bcd_in(d2), .bcd_out(D2));
-BCD disp3 (.bcd_in(d3), .bcd_out(D3));
+ BCD disp0 (.bcd_in(d0), .bcd_out(D0));
+ BCD disp1 (.bcd_in(d1), .bcd_out(D1));
+ BCD disp2 (.bcd_in(d2), .bcd_out(D2));
+ BCD disp3 (.bcd_in(d3), .bcd_out(D3));
 
 //Current state 
 
@@ -51,62 +54,40 @@ always @(posedge clk_div or posedge reset)
 
 always @(*)
     begin
-		if (reset)
-		begin 
-			next <= idle;
-			d0<=0;
-			d1<=0;
-			d2<=0;
-			d3<=0;
-		end
-		
-		else 
-		begin 
+		next = state;
 		case (state)
         idle: 
             if (check)
                 begin
-					d0 <= SW;
-                if ( SW == password[3:0])
+                if ( SW== password[3:0])
                     next = S1;
                 else 
                     next= BAD;
                 end
-            else 
-                next=idle;
         S1:
             if (check)
                 begin
-					 d1 <= SW;
                 if (SW == password[7:4])
                     next = S2;
                 else 
                     next= BAD;
                 end
-            else 
-                next=S1;
         S2: 
             if (check)
                     begin
-						  d2 <= SW;
                     if (SW == password[11:8])
                         next = S3;
                     else 
                         next= BAD;
                     end
-            else 
-                next=S2;
         S3:
         if (check)
                 begin
-					 d3 <= SW;
                 if (SW == password[15:12])
                     next = GOOD;
                 else 
                     next= BAD;
                 end
-            else 
-                next=S2;
         
         GOOD:
             if (reset)
@@ -123,8 +104,30 @@ always @(*)
         default:
             next = idle;
     endcase 
-    end
-end 
+   end
+
+always @(posedge clk_div or posedge reset)
+begin 
+	if (reset)
+	begin 
+		d0<= 0;
+		d1<= 0;
+		d2<= 0;
+		d3<= 0;
+	end
+	else
+		begin	
+			if (state == idle && check)
+				d0<=SW;
+			else if (state == S1 && check)
+				d1<=SW;
+			else if (state == S2 && check)
+				d2<=SW;
+			else if (state == S3 && check)
+				d3<=SW;
+		end
+end
+			
     
     //outputs 
     always @(*)
@@ -143,7 +146,7 @@ end
 			HEX0 = 7'b1000010;
 			HEX1 = 7'b0000001;
 			HEX2 = 7'b0000001;
-			HEX3 = 7'b0100001;
+			HEX3 = 7'b0100000;
 			end
 		
 		BAD: //bad
