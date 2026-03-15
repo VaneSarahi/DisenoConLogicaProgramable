@@ -6,7 +6,7 @@ module practica3_top(
     input [6:0] data_in, 
     output [6:0] HEX0, 
     output [6:0] HEX1, 
-    output [6:0] HEX2, 
+    output [6:0] HEX2
 );
 
 wire clk_div;
@@ -31,11 +31,11 @@ BCD MOD(
     .bcd_in(count)
 );
 
-BCD_4displays #(.N_in(7)), .N_out(7)  DISP(
+    BCD_4displays #(.N_in(7), .N_out(7))  DISP(
     .bcd_in(count), 
-    D_un(HEX0),
-    D_de(HEX1),
-    D_ce(HEX2)
+    .D_un(HEX0),
+    .D_de(HEX1),
+    .D_ce(HEX2)
 );
 
 endmodule 
